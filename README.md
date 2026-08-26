@@ -122,6 +122,8 @@ git submodule — no separate clone needed.
 
 ## Installation
 
+### HPC cluster
+
 ```bash
 # SSH (recommended — no password prompts if your key is registered on GitHub)
 git clone --recurse-submodules git@github.com:rabravo/minibeat-hpc-tracker.git
@@ -131,6 +133,29 @@ git clone --recurse-submodules git@github.com:rabravo/minibeat-hpc-tracker.git
 
 cd minibeat-hpc-tracker
 ./install.sh
+```
+
+The conda environment lands at `<repo>/../envs/minibeat-hpc` by default — one
+level above the repo, following the HPC project-root convention. Override with
+`ENV_PREFIX` if your cluster layout differs.
+
+On clusters where conda is not on `PATH` by default, `install.sh` attempts
+`module load miniconda3` automatically before failing.
+
+### Local workstation (macOS / Linux)
+
+Same clone command, but set `ENV_PREFIX` to keep the environment inside the repo:
+
+```bash
+git clone --recurse-submodules git@github.com:rabravo/minibeat-hpc-tracker.git
+cd minibeat-hpc-tracker
+ENV_PREFIX="$PWD/envs/minibeat-hpc" ./install.sh
+```
+
+Then launch with the same variable so `run_server.sh` finds the right Python:
+
+```bash
+ENV_PREFIX="$PWD/envs/minibeat-hpc" ./run_server.sh
 ```
 
 If you already cloned without `--recurse-submodules`:
@@ -143,6 +168,16 @@ git submodule update --init
 `install.sh` creates the `minibeat-hpc` conda environment (Python, NumPy, SciPy,
 numba, OpenCV, joblib, pandas, matplotlib, Flask, Werkzeug — no Qt, no napari)
 and prepares the job data directory. Run with `VERBOSE=1` to stream all output live.
+
+### Environment variable reference
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENV_PREFIX` | `<repo>/../envs/minibeat-hpc` | Path for the conda environment |
+| `DATA_ROOT` | `<repo>/WebJobs` | Where job uploads and outputs are stored |
+| `HOST` | `127.0.0.1` | Interface the server binds to |
+| `PORT` | `8766` | TCP port for the Flask server |
+| `VERBOSE` | `0` | Set to `1` to stream installer output live |
 
 ### Keeping minibeat-tracker up to date
 
