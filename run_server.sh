@@ -16,9 +16,33 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Prefer the minibeat-hpc conda env; fall back to whatever Python is active
-HPC_ENV_PYTHON="$SCRIPT_DIR/../envs/minibeat-hpc/bin/python3"
-PYTHON=${PYTHON:-${HPC_ENV_PYTHON:-python3}}
+# ---------------------------------------------------------------------------
+# OS-aware Python resolution
+#   Linux  — prefix env at <repo>/../envs/minibeat-hpc
+#   macOS / Windows — named env "minibeat-hpc" under conda base
+# ---------------------------------------------------------------------------
+case "$(uname -s 2>/dev/null)" in
+  Linux)               _PLATFORM="linux"   ;;
+  Darwin)              _PLATFORM="macos"   ;;
+  MINGW*|CYGWIN*|MSYS*) _PLATFORM="windows" ;;
+  *)                   _PLATFORM="linux"   ;;
+esac
+
+if [ -z "${PYTHON:-}" ]; then
+  if [ "$_PLATFORM" = "linux" ]; then
+    ENV_PREFIX="${ENV_PREFIX:-$SCRIPT_DIR/../envs/minibeat-hpc}"
+    PYTHON="$ENV_PREFIX/bin/python3"
+  else
+    _CONDA_BASE="$(conda info --base 2>/dev/null || true)"
+    PYTHON="${_CONDA_BASE}/envs/minibeat-hpc/bin/python3"
+  fi
+fi
+
+if [ ! -x "$PYTHON" ]; then
+  echo "ERROR: Python not found at $PYTHON" >&2
+  echo "Run ./install.sh first." >&2
+  exit 1
+fi
 
 export HOST="${HOST:-127.0.0.1}"
 export PORT="${PORT:-8766}"
@@ -27,6 +51,7 @@ export DATA_ROOT="${DATA_ROOT:-${SCRIPT_DIR}/WebJobs}"
 mkdir -p "$DATA_ROOT"
 
 echo "Starting MiniBeat HPC server on ${HOST}:${PORT}"
+echo "  Python:        $PYTHON"
 echo "  Job data root: ${DATA_ROOT}"
 
 exec "$PYTHON" mb_server.py \

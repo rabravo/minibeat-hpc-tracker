@@ -142,21 +142,27 @@ level above the repo, following the HPC project-root convention. Override with
 On clusters where conda is not on `PATH` by default, `install.sh` attempts
 `module load miniconda3` automatically before failing.
 
-### Local workstation (macOS / Linux)
+### Local workstation (macOS / Windows)
 
-Same clone command, but set `ENV_PREFIX` to keep the environment inside the repo:
+Same clone and install — no extra flags needed:
 
 ```bash
 git clone --recurse-submodules git@github.com:rabravo/minibeat-hpc-tracker.git
 cd minibeat-hpc-tracker
-ENV_PREFIX="$PWD/envs/minibeat-hpc" ./install.sh
+./install.sh
 ```
 
-Then launch with the same variable so `run_server.sh` finds the right Python:
+`install.sh` detects the OS via `uname -s` and picks the right conda strategy
+automatically:
 
-```bash
-ENV_PREFIX="$PWD/envs/minibeat-hpc" ./run_server.sh
-```
+| Platform | Conda env style | Location |
+|----------|----------------|----------|
+| Linux (HPC) | Prefix env | `<repo>/../envs/minibeat-hpc` |
+| macOS | Named env | `~/miniconda3/envs/minibeat-hpc` (conda default) |
+| Windows (Git Bash) | Named env | conda default envs directory |
+
+`run_server.sh` uses the same detection to find the right Python — no manual
+path overrides needed on any platform.
 
 If you already cloned without `--recurse-submodules`:
 
@@ -169,15 +175,15 @@ git submodule update --init
 numba, OpenCV, joblib, pandas, matplotlib, Flask, Werkzeug — no Qt, no napari)
 and prepares the job data directory. Run with `VERBOSE=1` to stream all output live.
 
-### Environment variable reference
+### Environment variable overrides
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ENV_PREFIX` | `<repo>/../envs/minibeat-hpc` | Path for the conda environment |
-| `DATA_ROOT` | `<repo>/WebJobs` | Where job uploads and outputs are stored |
-| `HOST` | `127.0.0.1` | Interface the server binds to |
-| `PORT` | `8766` | TCP port for the Flask server |
-| `VERBOSE` | `0` | Set to `1` to stream installer output live |
+| Variable | Applies to | Default | Description |
+|----------|-----------|---------|-------------|
+| `ENV_PREFIX` | Linux only | `<repo>/../envs/minibeat-hpc` | Override conda prefix location on HPC |
+| `DATA_ROOT` | all | `<repo>/WebJobs` | Where job uploads and outputs are stored |
+| `HOST` | all | `127.0.0.1` | Interface the server binds to |
+| `PORT` | all | `8766` | TCP port for the Flask server |
+| `VERBOSE` | install only | `0` | Set to `1` to stream installer output live |
 
 ### Keeping minibeat-tracker up to date
 

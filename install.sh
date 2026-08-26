@@ -22,7 +22,22 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-export ENV_PREFIX="${ENV_PREFIX:-$SCRIPT_DIR/../envs/minibeat-hpc}"
+# ---------------------------------------------------------------------------
+# OS detection — drives env strategy in setup_server.sh and run_server.sh
+# ---------------------------------------------------------------------------
+case "$(uname -s 2>/dev/null)" in
+  Linux)               _PLATFORM="linux"   ;;
+  Darwin)              _PLATFORM="macos"   ;;
+  MINGW*|CYGWIN*|MSYS*) _PLATFORM="windows" ;;
+  *)                   _PLATFORM="linux"   ;;
+esac
+export _PLATFORM
+
+# Linux/HPC: prefix env (overridable); macOS/Windows: named env "minibeat-hpc"
+if [ "$_PLATFORM" = "linux" ]; then
+  export ENV_PREFIX="${ENV_PREFIX:-$SCRIPT_DIR/../envs/minibeat-hpc}"
+fi
+
 export DATA_ROOT="${DATA_ROOT:-$SCRIPT_DIR/WebJobs}"
 VERBOSE="${VERBOSE:-0}"
 
@@ -135,9 +150,14 @@ printf "  MiniBeat HPC Tracker — Installer\n"
 printf "  Logs: %s\n" "$LOG_DIR"
 hr
 echo
-printf "  ENV_PREFIX   = %s\n" "$ENV_PREFIX"
-printf "  DATA_ROOT    = %s\n" "$DATA_ROOT"
-printf "  VERBOSE      = %s\n" "$VERBOSE"
+printf "  Platform:    %s\n" "$_PLATFORM"
+if [ "$_PLATFORM" = "linux" ]; then
+  printf "  Conda env:   prefix  → %s\n" "${ENV_PREFIX:-<repo>/../envs/minibeat-hpc}"
+else
+  printf "  Conda env:   named   → minibeat-hpc\n"
+fi
+printf "  DATA_ROOT:   %s\n" "$DATA_ROOT"
+printf "  VERBOSE:     %s\n" "$VERBOSE"
 echo
 printf "  Tip: VERBOSE=1 ./install.sh streams all output live.\n"
 echo
