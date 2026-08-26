@@ -1,0 +1,3 @@
+[submodule "minibeat-tracker"]
+	path = minibeat-tracker
+	url = https://github.com/rabravo/minibeat-tracker.git

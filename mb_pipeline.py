@@ -42,12 +42,11 @@ def _bootstrap_mbt() -> None:
     if "minibeat_tracker" in sys.modules:
         return
 
-    pkg_root = BASE_DIR.parent / "minibeat-tracker"
+    pkg_root = BASE_DIR / "minibeat-tracker"
     if not pkg_root.is_dir():
         raise RuntimeError(
-            f"minibeat-tracker package not found at {pkg_root}. "
-            "Make sure minibeat-hpc-tracker/ and minibeat-tracker/ sit "
-            "side-by-side inside minibeat-hpc-tracker/."
+            f"minibeat-tracker submodule not found at {pkg_root}. "
+            "Run: git submodule update --init"
         )
 
     # Register all packages as stubs (shallowest first) WITHOUT executing

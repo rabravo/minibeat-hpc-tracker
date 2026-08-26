@@ -113,26 +113,47 @@ sequenceDiagram
 
 - Linux (HPC cluster or local workstation)
 - Miniconda or Anaconda
-- [MiniBeat Tracker](https://github.com/rabravo/minibeat-tracker) installed in the same conda environment
-  (clone it and run `pip install -e .` from its directory before running `setup_server.sh`)
+- ffmpeg (frame extraction)
+
+[MiniBeat Tracker](https://github.com/rabravo/minibeat-tracker) is bundled as a
+git submodule — no separate clone needed.
 
 ---
 
 ## Installation
 
 ```bash
-# 1. Clone both repos side by side
-git clone https://github.com/rabravo/minibeat-tracker.git
-git clone https://github.com/rabravo/minibeat-hpc-tracker.git
+# SSH (recommended — no password prompts if your key is registered on GitHub)
+git clone --recurse-submodules git@github.com:rabravo/minibeat-hpc-tracker.git
 
-# 2. Set up the server environment
+# HTTPS
+# git clone --recurse-submodules https://github.com/rabravo/minibeat-hpc-tracker.git
+
 cd minibeat-hpc-tracker
-./setup_server.sh
+./install.sh
 ```
 
-`setup_server.sh` creates the `minibeat-hpc` conda environment with Python,
-NumPy, SciPy, numba, OpenCV, joblib, pandas, matplotlib, Flask, and Werkzeug.
-No Qt, no napari — headless only.
+If you already cloned without `--recurse-submodules`:
+
+```bash
+git submodule update --init
+./install.sh
+```
+
+`install.sh` creates the `minibeat-hpc` conda environment (Python, NumPy, SciPy,
+numba, OpenCV, joblib, pandas, matplotlib, Flask, Werkzeug — no Qt, no napari)
+and prepares the job data directory. Run with `VERBOSE=1` to stream all output live.
+
+### Keeping minibeat-tracker up to date
+
+When the analysis core is updated, run from the repo root:
+
+```bash
+./update_mbt.sh
+```
+
+This pulls the latest `minibeat-tracker` commit, stages the submodule pointer,
+and pushes the bump commit.
 
 ---
 
