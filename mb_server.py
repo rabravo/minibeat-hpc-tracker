@@ -68,6 +68,14 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8766
 DEFAULT_DATA_ROOT = BASE_DIR / "WebJobs"
 
+# On macOS/Windows store extracted frames in /tmp to avoid bloating WebJobs.
+# On Linux (HPC) keep frames inside output/ so they land in the ZIP download.
+_TMP_FRAMES = (
+    Path("/tmp") if sys.platform in ("darwin", "linux")
+    else Path(os.environ.get("TEMP", "/tmp"))
+)
+_FRAMES_IN_TMP = sys.platform == "darwin" or sys.platform.startswith("win")
+
 ALLOWED_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".m4v", ".wmv"}
 MAX_LOG_LINES = 10000
 MAX_UPLOAD_MB = 8192       # 8 GB ceiling — large videos welcome
@@ -298,9 +306,11 @@ def create_app(data_root: Path) -> Flask:
         job.append_log(f"Uploaded: {name}")
 
         params = _params_from_form(request.form)
-        params.src_dir       = str(job.input_dir)
-        params.tgt_dir       = str(job.output_dir)
+        params.src_dir        = str(job.input_dir)
+        params.tgt_dir        = str(job.output_dir)
         params.video_filename = name
+        if _FRAMES_IN_TMP:
+            params.frames_dir = str(_TMP_FRAMES / job.id / "frames")
 
         try:
             job.start(params)

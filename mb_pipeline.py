@@ -105,6 +105,7 @@ from minibeat_tracker.io.video import export_amplitude_video               # noq
 class JobParams:
     src_dir: str = ""       # directory containing the uploaded video
     tgt_dir: str = ""       # output directory
+    frames_dir: str = ""    # override for TIF frame storage (default: tgt_dir/frames)
 
     # Step 0: video extraction
     video_filename: str = ""  # uploaded video filename (relative to src_dir)
@@ -227,7 +228,7 @@ class Pipeline:
         # ---- Step 0: video extraction -------------------------------------------
         if p.video_filename:
             stem = Path(p.video_filename).stem
-            frames_dir = tgt / "frames"
+            frames_dir = Path(p.frames_dir) if p.frames_dir else tgt / "frames"
             self.log("Step 0: Extracting frames from video...")
             rc = self._extract_frames(src / p.video_filename, frames_dir)
             if rc != 0:
