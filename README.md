@@ -261,13 +261,22 @@ Open `http://localhost:8766/` in your browser.
 
 | File | Contents |
 |------|----------|
-| `frames/frame_XXXX.tif` | Extracted grayscale TIF frames |
 | `*_BeatingData.csv` | Per-frame contraction amplitude time series |
 | `*_RawPeaks.csv` | Detected peak times and heights |
 | `*_AnaPeaks.csv` | Per-cycle contraction/relaxation intervals (if ≥ 4 peaks) |
 | `*_AnaPeaksMean.csv` | Summary statistics across all cycles |
 | `*_amplitude.mp4` | Heatmap overlay video |
 | `mb_params.json` | Full parameter snapshot (loadable via the UI) |
+
+### Extracted frames
+
+| Platform | Frame location |
+|----------|---------------|
+| **Linux (HPC)** | `WebJobs/<job_id>/output/frames/` — included in the ZIP download |
+| **macOS / Windows** | `/tmp/<job_id>/frames/` — kept out of WebJobs to avoid bloating local disk |
+
+Frames are not included in the ZIP on macOS/Windows. If you need them locally,
+copy from `/tmp/<job_id>/frames/` before submitting the next job.
 
 ---
 
